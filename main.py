@@ -67,7 +67,7 @@ def load_forest_from_csv(filename):
         for row in reader:
             is_refusal = row[0]
             topic = row[1]
-            keyword = [2]
+            keyword = row[2]
             system_prompt = row[3]
             user_prompt = row[4]
             assistant_response = row[5]
