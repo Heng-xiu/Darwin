@@ -21,13 +21,15 @@ if not openai_api_key:
 
 
 class Node:
-    def __init__(self, system_prompt, user_prompt, assistant_response, is_refusal=False, parent=None):
+    def __init__(self, system_prompt, user_prompt, assistant_response, is_refusal=False, parent=None, topic=None, keyword=None):
         self.system_prompt = system_prompt
         self.user_prompt = user_prompt
         self.assistant_response = assistant_response
         self.is_refusal = is_refusal
         self.children = []
         self.parent = parent
+        self.topic = topic
+        self.keyword = keyword
 
 def should_prune(evolved_prompt, parent):
     """Evaluate the fitness of a potential child node based on its evolved prompt"""
@@ -61,12 +63,16 @@ def load_forest_from_csv(filename):
         # Skip the header row
         next(reader, None)
         
+        # WARNING THE FOLLOWING CODE DESPENDS OFFERED CSV HEADER
         for row in reader:
             is_refusal = row[0]
-            system_prompt = row[1]
-            user_prompt = row[2]
-            assistant_response = row[3]
-            root_node = Node(system_prompt, user_prompt, assistant_response, is_refusal)
+            topic = row[1]
+            keyword = [2]
+            system_prompt = row[3]
+            user_prompt = row[4]
+            assistant_response = row[5]
+
+            root_node = Node(system_prompt, user_prompt, assistant_response, is_refusal, topic=topic, keyword=keyword)
             forest.append(root_node)
 
     print("Loaded " + str(len(forest)) + " rows from " + filename)
@@ -87,7 +93,7 @@ def validate_csv_format(filename):
             return False
         
         # 2. Validate 'is_refusal' data and check for empty values
-        valid_is_refusal_values = {'True', 'False', '1', '0', 'Yes', 'No'}
+        valid_is_refusal_values = {'True', 'False', 'TRUE', 'FALSE', '1', '0', 'Yes', 'No'}
         for row_num, row in enumerate(reader, 1):  # Starting the row_num from 1 for human-readable indexing
             # Check for empty values in required columns
             for column in required_columns:
@@ -125,7 +131,7 @@ def evolve(node):
         # Check if the evolved prompt should be pruned
         if not should_prune(response_text, node):
             # If not pruned, then create a new child node and add to the tree
-            new_node = Node(system_prompt=node.system_prompt, user_prompt=response_text, assistant_response="", parent=node)
+            new_node = Node(system_prompt=node.system_prompt, user_prompt=response_text, assistant_response="", parent=node, topic=node.topic, keyword=node.keyword)
             node.children.append(new_node)
 
     # Evolve node using breadth evolution prompt
@@ -135,7 +141,7 @@ def evolve(node):
     # Check if the evolved prompt should be pruned
     if not should_prune(response_text, node):
         # If not pruned, then create a new child node and add to the tree
-        new_node = Node(system_prompt=node.system_prompt, user_prompt=response_text, assistant_response="", parent=node)
+        new_node = Node(system_prompt=node.system_prompt, user_prompt=response_text, assistant_response="", parent=node, topic=node.topic, keyword=node.keyword)
         return new_node
     
 
@@ -178,12 +184,12 @@ def save_forest_to_csv(forest, output_filename):
     """
     with open(output_filename, 'w', newline='') as file:
         writer = csv.writer(file)
-        writer.writerow(["Refusal", "System", "User", "Assistant"])  # Write header
+        writer.writerow(["Refusal", "Topic", "Keyword", "System", "User", "Assistant"])  # Write header
         
         for node in forest:
             # We will recursively traverse each tree to save each node
             def write_node(node):
-                writer.writerow([node.is_refusal, node.system_prompt, node.user_prompt, node.assistant_response])
+                writer.writerow([node.is_refusal, node.topic, node.keyword, node.system_prompt, node.user_prompt, node.assistant_response])
                 for child in node.children:
                     write_node(child)
             
