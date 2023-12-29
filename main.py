@@ -1,6 +1,9 @@
 import os
 from dotenv import load_dotenv
 import openai
+from openai import OpenAI
+client = OpenAI(api_key=openai_api_key)
+
 import csv
 import argparse
 from tqdm import tqdm
@@ -14,7 +17,7 @@ openai_api_key = os.environ.get('OPENAI_API_KEY')
 if not openai_api_key:
     raise ValueError("OPENAI_API_KEY not found in .env.local file or environment variables")
 
-openai.api_key = openai_api_key
+
 
 class Node:
     def __init__(self, system_prompt, user_prompt, assistant_response, is_refusal=False, parent=None):
@@ -99,11 +102,14 @@ def validate_csv_format(filename):
 
 def get_response(prompt_text):
     try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo", messages=[{"role": "user", "content": prompt_text}], temperature=0.8
+        response = client.chat.completions.create(
+            model="gpt-3.5-turbo", 
+            messages=[{"role": "user", "content": prompt_text}], 
+            temperature=0.8
         )
+
         return response.choices[0].message.content
-    except openai.error.OpenAIError as e:
+    except openai.OpenAIError as e:
         print(f"Error occurred while fetching response from OpenAI: {e}. Skipping this prompt.")
         return None  # return None to indicate a failed request
 
