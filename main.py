@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 import openai
 from openai import OpenAI
-client = OpenAI(api_key=openai_api_key)
+
 
 import csv
 import argparse
@@ -14,6 +14,7 @@ load_dotenv()
 
 # Fetch the OpenAI API key from the environment variable
 openai_api_key = os.environ.get('OPENAI_API_KEY')
+client = OpenAI(api_key=openai_api_key)
 if not openai_api_key:
     raise ValueError("OPENAI_API_KEY not found in .env.local file or environment variables")
 
