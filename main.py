@@ -130,8 +130,11 @@ def evolve(node):
         
         # Check if the evolved prompt should be pruned
         if not should_prune(response_text, node):
+            # Get a response from OpenAI for the new node
+            assistant_response = get_response(response_text)
+
             # If not pruned, then create a new child node and add to the tree
-            new_node = Node(system_prompt=node.system_prompt, user_prompt=response_text, assistant_response="", parent=node, topic=node.topic, keyword=node.keyword)
+            new_node = Node(system_prompt=node.system_prompt, user_prompt=response_text, assistant_response=assistant_response, parent=node, topic=node.topic, keyword=node.keyword)
             node.children.append(new_node)
 
     # Evolve node using breadth evolution prompt
@@ -140,8 +143,11 @@ def evolve(node):
     
     # Check if the evolved prompt should be pruned
     if not should_prune(response_text, node):
+        # Get a response from OpenAI for the new node
+        assistant_response = get_response(response_text)
+
         # If not pruned, then create a new child node and add to the tree
-        new_node = Node(system_prompt=node.system_prompt, user_prompt=response_text, assistant_response="", parent=node, topic=node.topic, keyword=node.keyword)
+        new_node = Node(system_prompt=node.system_prompt, user_prompt=response_text, assistant_response=assistant_response, parent=node, topic=node.topic, keyword=node.keyword)
         return new_node
     
 
