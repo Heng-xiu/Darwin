@@ -120,7 +120,7 @@ def get_response(prompt_text):
         print(f"Error occurred while fetching response from OpenAI: {e}. Skipping this prompt.")
         return None  # return None to indicate a failed request
 
-def evolve(node):
+def evolve(node, get_assistant_response=False):
     """Evolve the current node, return node to add as a new root node"""
 
     # Evolve node using depth evolution prompts
@@ -131,7 +131,7 @@ def evolve(node):
         # Check if the evolved prompt should be pruned
         if not should_prune(response_text, node):
             # Get a response from OpenAI for the new node
-            assistant_response = get_response(response_text)
+            assistant_response = get_response(response_text) if get_assistant_response else ""
 
             # If not pruned, then create a new child node and add to the tree
             new_node = Node(system_prompt=node.system_prompt, user_prompt=response_text, assistant_response=assistant_response, parent=node, topic=node.topic, keyword=node.keyword)
@@ -144,7 +144,7 @@ def evolve(node):
     # Check if the evolved prompt should be pruned
     if not should_prune(response_text, node):
         # Get a response from OpenAI for the new node
-        assistant_response = get_response(response_text)
+        assistant_response = get_response(response_text) if get_assistant_response else ""
 
         # If not pruned, then create a new child node and add to the tree
         new_node = Node(system_prompt=node.system_prompt, user_prompt=response_text, assistant_response=assistant_response, parent=node, topic=node.topic, keyword=node.keyword)
@@ -215,6 +215,8 @@ def main():
     # Optional argument for the number of epochs, defaults to 4
     parser.add_argument('--epochs', type=int, default=4, help='Number of epochs to evolve the leaf nodes. Defaults to 4.')
 
+    # 新增參數以控制是否從 OpenAI 獲取回答
+    parser.add_argument('--get-assistant-response', action='store_true', help='Get assistant responses from OpenAI for each evolved node.')
 
     args = parser.parse_args()
     
@@ -241,7 +243,8 @@ def main():
         
         # Use tqdm to wrap around the leaf nodes iteration
         for leaf in tqdm(all_leaf_nodes, desc=f"Epoch {epoch+1} Progress", ncols=100):
-            new_root = evolve(leaf)
+            # 根據命令行選項決定是否獲取回答
+            new_root = evolve(leaf, get_assistant_response=args.get_assistant_response)
             if new_root:
                 forest.append(new_root)
                 root_nodes_added += 1
