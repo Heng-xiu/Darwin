@@ -110,7 +110,7 @@ def validate_csv_format(filename):
 def get_response(prompt_text):
     try:
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo", 
+            model="gpt-3.5-turbo-1106", 
             messages=[{"role": "user", "content": prompt_text}], 
             temperature=0.8
         )
