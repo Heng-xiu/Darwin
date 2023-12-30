@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import openai
 from openai import OpenAI
 
-
+import datetime
 import csv
 import argparse
 from tqdm import tqdm
@@ -253,8 +253,14 @@ def main():
         print(f"Leaves Added in Epoch {epoch+1}: {leaves_added}")
         print(f"Root Nodes Added in Epoch {epoch+1}: {root_nodes_added}")
 
-        save_forest_to_csv(forest, args.output_file)
-        print(f"Results saved to {args.output_file} after epoch {epoch + 1}")
+        # 獲取當前時間
+        current_time = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        # 生成包含 epoch 和時間的檔案名稱
+        epoch_output_file = f"{args.output_file}_epoch{epoch+1}_{current_time}.csv"
+
+        save_forest_to_csv(forest, epoch_output_file)
+        print(f"Results saved to {epoch_output_file} after epoch {epoch + 1}")
 
 
 
