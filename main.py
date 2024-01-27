@@ -21,7 +21,7 @@ if not openai_api_key:
 
 
 class Node:
-    def __init__(self, system_prompt, user_prompt, assistant_response, is_refusal=False, parent=None, topic=None, keyword=None):
+    def __init__(self, system_prompt, user_prompt, assistant_response, parent=None, topic=None, keyword=None):
         self.system_prompt = system_prompt
         self.user_prompt = user_prompt
         self.assistant_response = assistant_response
@@ -65,14 +65,15 @@ def load_forest_from_csv(filename):
         
         # WARNING THE FOLLOWING CODE DESPENDS OFFERED CSV HEADER
         for row in reader:
-            is_refusal = row[0]
-            topic = row[1]
-            keyword = row[2]
-            system_prompt = row[3]
-            user_prompt = row[4]
-            assistant_response = row[5]
+            # is_refusal = row[0]
+            # topic = row[1]
+            # keyword = row[2]
+            system_prompt = row[0]
+            user_prompt = row[1]
+            assistant_response = row[2]
 
-            root_node = Node(system_prompt, user_prompt, assistant_response, is_refusal, topic=topic, keyword=keyword)
+            # root_node = Node(system_prompt, user_prompt, assistant_response, is_refusal, topic=topic, keyword=keyword)
+            root_node = Node(system_prompt, user_prompt, assistant_response)
             forest.append(root_node)
 
     print("Loaded " + str(len(forest)) + " rows from " + filename)
@@ -86,7 +87,7 @@ def validate_csv_format(filename):
         
         # 1. Validate header columns
         headers = reader.fieldnames
-        required_columns = {'User', 'Assistant', 'Refusal'}
+        required_columns = {'User', 'Assistant'}
         
         if not required_columns.issubset(headers):
             print("Error: CSV is missing one or more required columns.")
@@ -101,9 +102,9 @@ def validate_csv_format(filename):
                     print(f"Error: Missing value in column '{column}' on row {row_num}.")
                     return False
             
-            if row['Refusal'] not in valid_is_refusal_values:
-                print(f"Error: Invalid value '{row['refusal']}' in 'refusal' column for prompt '{row['prompt']}' on row {row_num}.")
-                return False
+            # if row['Refusal'] not in valid_is_refusal_values:
+            #     print(f"Error: Invalid value '{row['refusal']}' in 'refusal' column for prompt '{row['prompt']}' on row {row_num}.")
+            #     return False
 
     return True
 
@@ -195,7 +196,8 @@ def save_forest_to_csv(forest, output_filename):
         for node in forest:
             # We will recursively traverse each tree to save each node
             def write_node(node):
-                writer.writerow([node.is_refusal, node.topic, node.keyword, node.system_prompt, node.user_prompt, node.assistant_response])
+                # writer.writerow([node.is_refusal, node.topic, node.keyword, node.system_prompt, node.user_prompt, node.assistant_response])
+                writer.writerow([node.system_prompt, node.user_prompt, node.assistant_response])
                 for child in node.children:
                     write_node(child)
             
