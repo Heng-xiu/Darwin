@@ -25,7 +25,7 @@ class Node:
         self.system_prompt = system_prompt
         self.user_prompt = user_prompt
         self.assistant_response = assistant_response
-        self.is_refusal = is_refusal
+        # self.is_refusal = is_refusal
         self.children = []
         self.parent = parent
         self.topic = topic
